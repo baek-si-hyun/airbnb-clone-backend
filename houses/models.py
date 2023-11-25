@@ -1,5 +1,4 @@
 from django.db import models
-from tabnanny import verbose
 
 # House클래스에 장고에서 기본으로 제공해주는 models.Model을 상속받는다
 # model을 데이터베이스와 통신하는 위한 로직을 말한다.
@@ -22,6 +21,8 @@ class House(models.Model):
         default=True,
         help_text="Does this house allow pets?",
     )
+
+    owner = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
     def __str__(self):
         return
