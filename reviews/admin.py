@@ -29,3 +29,4 @@ class WordFilter(admin.SimpleListFilter):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ("__str__", "payload")
     list_filter = ("rating", "user__is_host", "room__category", "room__pet_friendly")
+ 
