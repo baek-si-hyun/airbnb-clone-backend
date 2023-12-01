@@ -1,39 +1,20 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Room
+from rest_framework.views import APIView
 
 
-def see_all_rooms(request):
-    rooms = Room.objects.all()
-    return render(
-        request,
-        "all_rooms.html",
-        {
-            "rooms": rooms,
-            "title": "Hello! this title comes from django!",
-        },
-    )
+class Amenities(APIView):
+    def get(self, request):
+        pass
+
+    def post(self, request):
+        pass
 
 
-def see_one_room(request, room_id):
-    return HttpResponse(f"see room with id: {room_id}")
+class AmenityDetail(APIView):
+    def get(self, request, pk):
+        pass
 
+    def post(self, request, pk):
+        pass
 
-def see_one_room(request, room_pk):
-    try:
-        room = Room.objects.get(pk=room_pk)
-        return render(
-            request,
-            "room_detail.html",
-            {
-                "room": room,
-            },
-        )
-    except Room.DoesNotExist:
-        return render(
-            request,
-            "room_detail.html",
-            {
-                "not_found": True,
-            },
-        )
+    def delete(self, request, pk):
+        pass
