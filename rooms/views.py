@@ -87,7 +87,9 @@ class Rooms(APIView):
             except Category.DoesNotExist:
                 raise ParseError("Category not found")
             try:
+                # 여러 데이터베이스 작업이 일어나는 상황에서 중간에 어떤 작업이 실패하면 transaction.atomic() 블록 전체가 롤백되어 이전 상태로 돌아가게 된다. 모든 작업이 성공하면 트랜잭션이 커밋되어 변경 사항이 영구적으로 적용된다.
                 with transaction.atomic():
+                    # onwer=request.user는 serializer가 save할때 onwer를 자동으로 추가해준다
                     room = serializer.save(
                         owner=request.user,
                         category=category,
