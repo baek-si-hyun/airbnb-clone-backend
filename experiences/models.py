@@ -9,6 +9,7 @@ class Experience(CommonModel):
     host = models.ForeignKey("users.User", on_delete=models.CASCADE)
     price = models.PositiveIntegerField()
     address = models.CharField(max_length=250)
+    date = models.DateField(null=True, blank=True)
     start = models.TimeField()
     end = models.TimeField()
     description = models.TextField()

@@ -11,7 +11,6 @@ from reviews.serializers import ReviewSerializer
 from medias.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.utils import timezone
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from bookings.models import Booking
 from bookings.serializers import PublicBookingSerializer, CreateRoomBookingSerializer
 
@@ -29,9 +28,9 @@ class Amenities(APIView):
         if serializer.is_valid:
             # 유효성 검사를 통과하면 serializer.save()를 호출하여 새로운 Amenity 객체를 데이터베이스에 저장합니다.
             amenity = serializer.save()
-            # 저장된 Amenity 객체를 다시 AmenitySerializer(amenity.data)를 사용하여 직렬화하고, 이를 Response 객체에 담아 클라이언트에게 반환합니다.
+            # 저장된 Amenity 객체를 다시 AmenitySerializer(amenity).data를 사용하여 직렬화하고, 이를 Response 객체에 담아 클라이언트에게 반환합니다.
             # Django REST framework에서의 직렬화는 데이터를 JSON 또는 다른 형식으로 변환하는 작업
-            return Response(AmenitySerializer(amenity.data))
+            return Response(AmenitySerializer(amenity).data)
         else:
             return Response(serializer.errors)
 
