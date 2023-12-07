@@ -11,16 +11,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+import environ
 
+env = environ.Env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ktu+jw4)(vpsjxvb99g8%h%-u@sy2oph*hq=l-kgpe+ttmxawq"
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,6 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 CUSTOM_APPS = [
@@ -143,8 +147,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Auth
 AUTH_USER_MODEL = "users.User"
 # 실제로 파일이 존재하는 폴더
-MEDIA_ROOT ="uploads"
+MEDIA_ROOT = "uploads"
 # 브라우저가 파일을 찾아가는 방법
-MEDIA_URL ="user-uploads/"
+MEDIA_URL = "user-uploads/"
 
 PAGE_SIZE = 3
+
+# "rest_framework.authentication.SessionAuthentication" 는 기본으로 제공해야하는, 제공되는 AUTHENTICATION_CLASSES이다
+#  "rest_framework.authentication.TokenAuthentication"는 request에서 토큰을 찾아 user가 누군지 알려준다.
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "config.authentication.TrustMeBroAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+        "config.authentication.JWTAuthentication",
+    ]
+}

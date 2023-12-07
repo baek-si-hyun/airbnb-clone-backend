@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from django.db import transaction
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, ParseError, PermissionDenied
-from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 from .models import Amenity, Room
 from categories.models import Category
 from .serializers import AmenitySerializer, RoomListSerializer, RoomDetailSerializer
@@ -32,7 +32,10 @@ class Amenities(APIView):
             # Django REST framework에서의 직렬화는 데이터를 JSON 또는 다른 형식으로 변환하는 작업
             return Response(AmenitySerializer(amenity).data)
         else:
-            return Response(serializer.errors)
+            return Response(
+                serializer.errors,
+                status=HTTP_400_BAD_REQUEST,
+            )
 
 
 class AmenityDetail(APIView):
