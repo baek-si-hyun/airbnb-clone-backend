@@ -6,7 +6,7 @@ class Room(CommonModel):
     class RoomKindChoices(models.TextChoices):
         ENTIRE_PLACE = ("entire_place", "Entire Place")
         PRIVATE_ROOM = ("private_room", "Private Room")
-        SHARED_ROOM = ("shared_room", "Shared Room")
+        SHARED_ROOM = "shared_room", "Shared Room"
 
     name = models.CharField(max_length=180, default="")
     country = models.CharField(max_length=50, default="한국")
@@ -21,7 +21,7 @@ class Room(CommonModel):
     owner = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="rooms"
     )
-    amenities = models.ManyToManyField("rooms.Amenity")
+    amenities = models.ManyToManyField("rooms.Amenity", related_name="rooms")
     category = models.ForeignKey(
         "categories.Category",
         null=True,
@@ -30,22 +30,21 @@ class Room(CommonModel):
         related_name="rooms",
     )
 
-    def __str__(self) -> str:
-        return self.name
+    def __str__(room) -> str:
+        return room.name
 
-    def total_amenities(self):
-        return self.amenities.count()
+    def total_amenities(room):
+        return room.amenities.count()
 
-    def rating(self):
-        count = self.review_set.count()
+    def rating(room):
+        count = room.reviews.count()
         if count == 0:
             return 0
         else:
             total_rating = 0
-            # self.review_set.all().values("rating") == [{"rating" : 5}, {"rating": 3}, {"rating" : 4}]
-            for review in self.review_set.all().values("rating"):
+            for review in room.reviews.all().values("rating"):
                 total_rating += review["rating"]
-            return round(total_rating / count, 1)
+            return round(total_rating / count, 2)
 
 
 class Amenity(CommonModel):
