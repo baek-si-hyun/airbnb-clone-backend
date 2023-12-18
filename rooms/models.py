@@ -6,7 +6,7 @@ class Room(CommonModel):
     class RoomKindChoices(models.TextChoices):
         ENTIRE_PLACE = ("entire_place", "Entire Place")
         PRIVATE_ROOM = ("private_room", "Private Room")
-        SHARED_ROOM = "shared_room", "Shared Room"
+        SHARED_ROOM = ("shared_room", "Shared Room")
 
     name = models.CharField(max_length=180, default="")
     country = models.CharField(max_length=50, default="한국")

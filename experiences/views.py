@@ -1,9 +1,20 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.status import HTTP_204_NO_CONTENT
+from rest_framework.exceptions import NotFound, PermissionDenied, ParseError
+from rest_framework.status import (
+    HTTP_204_NO_CONTENT,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+)
 from .models import Perk, Experience
-from .serializers import PerkSerializer, ExperiencesSerializer
+from bookings.models import Booking
+from rooms.models import Room
+from .serializers import (
+    PerkSerializer,
+    ExperiencesSerializer,
+    BookingsSerializer,
+    ExperienceDetailSerializer,
+)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 
@@ -69,7 +80,6 @@ class Experiences(APIView):
         serializer = ExperiencesSerializer(data=request.data)
         if serializer.is_valid():
             host_pk = request.user
-            print(host_pk)
             experience = serializer.save(host=host_pk)
             return Response(ExperiencesSerializer(experience).data)
         else:
@@ -87,15 +97,19 @@ class ExperienceDetail(APIView):
 
     def get(self, request, pk):
         experience = self.get_object(pk)
-        serializer = ExperiencesSerializer(experience)
+        serializer = ExperienceDetailSerializer(
+            experience, context={"request": request}
+        )
         return Response(serializer.data)
 
     def put(self, request, pk):
         experience = self.get_object(pk)
-        serializer = ExperiencesSerializer(experience, data=request.data, partial=True)
+        serializer = ExperienceDetailSerializer(
+            experience, data=request.data, partial=True
+        )
         if serializer.is_valid():
             update_experience = serializer.save()
-            return Response(ExperiencesSerializer(update_experience).data)
+            return Response(ExperienceDetailSerializer(update_experience).data)
         else:
             Response(serializer.errors)
 
@@ -103,3 +117,40 @@ class ExperienceDetail(APIView):
         experience = self.get_object(pk)
         experience.delete()
         return Response(status=HTTP_204_NO_CONTENT)
+
+
+class ExperienceBookings(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_object(self, pk):
+        try:
+            return Experience.objects.get(pk=pk)
+        except Experience.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk):
+        experience = self.get_object(pk)
+        bookings = experience.bookings.all()
+        serializer = BookingsSerializer(
+            bookings, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    def post(self, request, pk):
+        serializer = BookingsSerializer(data=request.data)
+        if serializer.is_valid():
+            room_pk = request.data.get("room")
+            if not room_pk:
+                raise ParseError("Room is required.")
+            try:
+                room = Room.objects.get(pk=room_pk)
+                booking = serializer.save(
+                    user=request.user,
+                    experience=self.get_object(pk),
+                    room=room,
+                )
+                serializer = BookingsSerializer(booking)
+                return Response(serializer.data, status=HTTP_201_CREATED)
+            except Exception:
+                return Response(status=HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
