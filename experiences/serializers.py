@@ -28,13 +28,13 @@ class ExperiencesSerializer(ModelSerializer):
         )
 
 
-class TinyExperienceSerializer(ModelSerializer):
-    class Meta:
-        model = Experience
-        fields = ("name",)
-
-
 class BookingsSerializer(ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = "__all__"
+
+
+class BookingDetailSerializer(ModelSerializer):
     class Meta:
         model = Booking
         fields = "__all__"
@@ -65,6 +65,6 @@ class ExperienceDetailSerializer(ModelSerializer):
             "is_host",
         )
 
-    def get_is_host(self, host):
+    def get_is_host(self, object):
         request = self.context["request"]
-        return host.name == request.user
+        return object.host == request.user

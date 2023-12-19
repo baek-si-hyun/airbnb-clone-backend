@@ -14,6 +14,7 @@ from .serializers import (
     ExperiencesSerializer,
     BookingsSerializer,
     ExperienceDetailSerializer,
+    BookingDetailSerializer,
 )
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
@@ -154,3 +155,32 @@ class ExperienceBookings(APIView):
             except Exception:
                 return Response(status=HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+
+class BookingDetail(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_object(self, pk, booking_pk):
+        try:
+            return Booking.objects.get(pk=booking_pk, experience__pk=pk)
+        except Booking.DoesNotExist:
+            raise NotFound
+
+    def get(self, request, pk, booking_pk):
+        booking = self.get_object(pk, booking_pk)
+        serializer = BookingDetailSerializer(booking)
+        return Response(serializer.data)
+
+    def put(self, request, pk, booking_pk):
+        booking = self.get_object(pk, booking_pk)
+        serializer = BookingDetailSerializer(booking, data=request.data, partial=True)
+        if serializer.is_valid():
+            update_booking = serializer.save()
+            return Response(BookingDetailSerializer(update_booking).data)
+        else:
+            Response(serializer.errors)
+
+    def delete(self, request, pk, booking_pk):
+        booking = self.get_object(pk, booking_pk)
+        booking.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
